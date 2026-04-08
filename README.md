@@ -291,6 +291,7 @@ Solution: Run prepare_cvppp_dataset.py first
 ## References
 
 - **CVPPP Challenge**: https://www.plant-phenotyping.org/
+- **Dataset download**: http://download.fz-juelich.de/ibg-2/CVPPP2017_LCC_training.zip
 - **Frame Differencing**: Classical computer vision technique for motion detection
 - **Contour Analysis**: OpenCV contour detection methods
 - **IoU Metric**: Standard metric in image segmentation
