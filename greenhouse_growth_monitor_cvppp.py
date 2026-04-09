@@ -29,7 +29,7 @@ GT_MASK_DIR = None  # Will be set by main() if available
 OUTPUT_DIR = "output/results"
 IMAGE_SIZE = (256, 256)
 BLUR_KERNEL = (5, 5)
-DIFF_THRESH = 15  # Lowered from 30 to detect more changes
+DIFF_THRESH = 50  # Increased from 15 to reduce false positives (white masks)
 MIN_CONTOUR = 1000  # Increased to filter more noise
 
 # ─────────────────────────────────────────────
@@ -365,9 +365,31 @@ def evaluate_iou(processed_frames, gt_masks, areas):
     return iou_scores, area_errors
 
 
-# ─────────────────────────────────────────────
-# OUTPUT: SAVE ANNOTATED FRAMES
-# ─────────────────────────────────────────────
+def save_preprocessing_demo(original_img, processed_img, output_dir):
+    """
+    Save demo images showing preprocessing steps.
+    Saves: original, resized, blurred, enhanced (CLAHE)
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Original
+    cv2.imwrite(os.path.join(output_dir, "01_original.png"), original_img)
+    
+    # Resized
+    resized = cv2.resize(original_img, IMAGE_SIZE)
+    cv2.imwrite(os.path.join(output_dir, "02_resized.png"), resized)
+    
+    # Grayscale + blurred (without CLAHE to avoid black images)
+    gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, BLUR_KERNEL, 0)
+    cv2.imwrite(os.path.join(output_dir, "03_blurred.png"), blurred)
+    
+    # Enhanced (CLAHE with lower clipLimit to avoid over-enhancement)
+    clahe = cv2.createCLAHE(clipLimit=1.0, tileGridSize=(8, 8))  # Lower clipLimit
+    enhanced = clahe.apply(blurred)
+    cv2.imwrite(os.path.join(output_dir, "04_enhanced.png"), enhanced)
+    
+    print(f"[INFO] Preprocessing demo images saved to '{output_dir}'")
 
 def save_annotated_frames(original_images, diff_masks, contours, areas, output_dir):
     """
